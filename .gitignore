@@ -1,0 +1,20 @@
+node_modules
+
+build
+dist
+
+# misc
+.DS_Store
+*.pem
+.vscode
+
+# debug
+npm-debug.log*
+
+# local env files
+.env*
+!.env.example
+
+.turbo
+
+*.tsbuildinfo

@@ -1,0 +1,21 @@
+{
+  "name": "@repo/mongodb-client",
+  "version": "0.0.0",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "mongodb": "6.15"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "rimraf": "^6.0.1"
+  }
+}

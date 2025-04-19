@@ -1,0 +1,77 @@
+name: nodejs-microservices
+services:
+  user-service:
+    image: user-service:latest
+    pull_policy: never
+    container_name: user-service
+    restart: always
+    depends_on:
+      - mongodb
+      - rabbitmq
+    env_file:
+      - apps/user-service/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  notification-service:
+    image: notification-service:latest
+    pull_policy: never
+    container_name: notification-service
+    restart: always
+    depends_on:
+      - mongodb
+      - rabbitmq
+    env_file:
+      - apps/notification-service/.env
+    ports:
+      - "3001:3001"
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672" # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - backend
+
+volumes:
+  mongo_data:
+  rabbitmq_data:
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,28 @@
+{
+  "name": "user-service",
+  "version": "1.0.0",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "dotenv -e .env -o -- tsx watch --clear-screen=false ./src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rimraf dist"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "dotenv-cli": "^8.0.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@repo/logger": "*",
+    "@repo/mongodb-client": "*",
+    "@repo/rmq-client": "*",
+    "amqplib": "^0.10.7",
+    "express": "^5.1.0",
+    "zod": "^3.24.3"
+  }
+}

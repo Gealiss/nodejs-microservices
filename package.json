@@ -1,0 +1,24 @@
+{
+  "name": "nodejs-microservices",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "packageManager": "npm@10.9.2",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "docker-build/user-service": "docker build --platform=linux/amd64 -f apps/user-service/Dockerfile -t user-service:latest .",
+    "docker-build/notification-service": "docker build --platform=linux/amd64 -f apps/notification-service/Dockerfile -t notification-service:latest .",
+    "up": "docker compose up",
+    "clean": "turbo run clean"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.5.0"
+  }
+}

@@ -1,0 +1,56 @@
+import { RequestHandler } from "express";
+import { env } from "../../env.js";
+
+import { mongoClient, ObjectId } from "@repo/mongodb-client";
+import { logger } from "@repo/logger";
+
+import { updateUserReqBodySchema } from "./body.js";
+import { updateUserReqParamsSchema } from "./params.js";
+
+export const updateUserHandler: RequestHandler = async (req, res) => {
+  // Parse and validate request body
+  const parseResult = updateUserReqBodySchema.safeParse(req.body);
+  if (!parseResult.success) {
+    res.status(400).json({ error: parseResult.error });
+    return;
+  }
+  const userData = parseResult.data;
+
+  // Parse and validate request params
+  const parseParamsResult = updateUserReqParamsSchema.safeParse(req.params);
+  if (!parseParamsResult.success) {
+    res.status(400).json({ error: parseParamsResult.error });
+    return;
+  }
+  const userId = parseParamsResult.data.id;
+
+  const db = mongoClient.db(env.DB_NAME);
+  const usersCollection = db.collection(env.DB_USERS_COLLECTION_NAME);
+
+  try {
+    const result = await usersCollection.updateOne(
+      {
+        _id: new ObjectId(userId),
+      },
+      {
+        $set: {
+          name: userData.name,
+          email: userData.email,
+        },
+      },
+      { upsert: false }
+    );
+
+    if (result.matchedCount === 0) {
+      res.status(400).json({ error: "User was not found" });
+      return;
+    }
+  } catch (error) {
+    console.error(error);
+    logger.error(error);
+    res.sendStatus(500);
+    return;
+  }
+
+  res.sendStatus(204);
+};
