@@ -1,39 +1,30 @@
 import { RequestHandler } from "express";
-import { env } from "../../env.js";
-
-import { mongoClient } from "@repo/mongodb-client";
 import {
   rmqChannel,
   userEvents,
   userEventsExchangeName,
   UserCreatedEventBody,
 } from "@repo/rmq-client";
-
-import { createUserReqBodySchema } from "./body.js";
 import { logger } from "@repo/logger";
 
-export const createUserHandler: RequestHandler = async (req, res) => {
-  // Parse and validate request body
-  const parseResult = createUserReqBodySchema.safeParse(req.body);
-  if (!parseResult.success) {
-    res.status(400).json({ error: parseResult.error });
-    return;
-  }
+import { CreateUserReqBody } from "./body.js";
+import { usersCollection } from "../../db.js";
 
-  const userData = parseResult.data;
-  const createdAt = new Date();
+export const createUserHandler: RequestHandler<unknown, unknown, CreateUserReqBody> = async (
+  req,
+  res
+) => {
+  const userData = req.body;
+
+  let createdAt: Date;
   let userId: string;
-
-  const db = mongoClient.db(env.DB_NAME);
-  const usersCollection = db.collection(env.DB_USERS_COLLECTION_NAME);
-
   try {
     const result = await usersCollection.insertOne({
       name: userData.name,
       email: userData.email,
-      createdAt,
     });
     userId = result.insertedId.toString();
+    createdAt = result.insertedId.getTimestamp();
   } catch (error) {
     logger.error(error);
     res.sendStatus(500);

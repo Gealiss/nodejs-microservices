@@ -1,9 +1,4 @@
-import {
-  connect,
-  ChannelWrapper,
-  ConnectionUrl,
-  AmqpConnectionManager,
-} from "amqp-connection-manager";
+import { connect, ChannelWrapper } from "amqp-connection-manager";
 import { Channel, Options } from "amqplib";
 import { logger } from "@repo/logger";
 

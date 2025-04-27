@@ -1,31 +1,20 @@
 import { RequestHandler } from "express";
-import { env } from "../../env.js";
 
-import { mongoClient, ObjectId } from "@repo/mongodb-client";
+import { ObjectId } from "@repo/mongodb-client";
 import { logger } from "@repo/logger";
 
-import { updateUserReqBodySchema } from "./body.js";
-import { updateUserReqParamsSchema } from "./params.js";
+import { usersCollection } from "../../db.js";
+import { UpdateUserReqBody } from "./body.js";
+import { UpdateUserReqParams } from "./params.js";
+import { ErrorResponseBody } from "../../common/error.response-body.js";
 
-export const updateUserHandler: RequestHandler = async (req, res) => {
-  // Parse and validate request body
-  const parseResult = updateUserReqBodySchema.safeParse(req.body);
-  if (!parseResult.success) {
-    res.status(400).json({ error: parseResult.error });
-    return;
-  }
-  const userData = parseResult.data;
-
-  // Parse and validate request params
-  const parseParamsResult = updateUserReqParamsSchema.safeParse(req.params);
-  if (!parseParamsResult.success) {
-    res.status(400).json({ error: parseParamsResult.error });
-    return;
-  }
-  const userId = parseParamsResult.data.id;
-
-  const db = mongoClient.db(env.DB_NAME);
-  const usersCollection = db.collection(env.DB_USERS_COLLECTION_NAME);
+export const updateUserHandler: RequestHandler<
+  UpdateUserReqParams,
+  unknown,
+  UpdateUserReqBody
+> = async (req, res) => {
+  const userData = req.body;
+  const userId = req.params.id;
 
   try {
     const result = await usersCollection.updateOne(
@@ -42,11 +31,11 @@ export const updateUserHandler: RequestHandler = async (req, res) => {
     );
 
     if (result.matchedCount === 0) {
-      res.status(400).json({ error: "User was not found" });
+      const responseBody: ErrorResponseBody = { error: "User was not found" };
+      res.status(400).json(responseBody);
       return;
     }
   } catch (error) {
-    console.error(error);
     logger.error(error);
     res.sendStatus(500);
     return;
