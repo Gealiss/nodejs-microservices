@@ -1,7 +1,7 @@
 import express from "express";
 import { env } from "./env.js";
 
-import { rmqChannel, userEvents, userEventsExchangeName } from "@repo/rmq-client";
+import { rmqChannel } from "@repo/rmq-client";
 import { logger } from "@repo/logger";
 import { mongoClient } from "@repo/mongodb-client";
 

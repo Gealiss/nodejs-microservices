@@ -8,18 +8,30 @@ import {
 } from "@repo/rmq-client";
 import { logger } from "@repo/logger";
 
-import { DeleteUserReqParams } from "./params.js";
-import { ErrorResponseBody } from "../../common/error.response-body.js";
 import { usersCollection } from "../../db.js";
+import { validateRequestData } from "../../common/validation.utils.js";
+import { deleteUserReqParamsSchema } from "./params.js";
 
-export const deleteUserHandler: RequestHandler<DeleteUserReqParams> = async (req, res) => {
-  const userId = req.params.id;
+export const deleteUserHandler: RequestHandler = async (req, res) => {
+  // Validate request data
+  const validation = validateRequestData({
+    req,
+    schemas: {
+      params: deleteUserReqParamsSchema,
+    },
+  });
+
+  if (validation.error) {
+    res.status(400).json(validation.error);
+    return;
+  }
+
+  const userId = validation.data.params.id;
 
   try {
     const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
     if (result.deletedCount !== 1) {
-      const responseBody: ErrorResponseBody = { error: "User was not deleted" };
-      res.status(400).json(responseBody);
+      res.status(400).json({ error: "User was not deleted" });
       return;
     }
   } catch (error) {

@@ -2,15 +2,24 @@ import { RequestHandler } from "express";
 import { logger } from "@repo/logger";
 
 import { usersCollection } from "../../db.js";
-import { FindManyUsersReqQuery } from "./query.js";
+import { findManyUsersReqQuerySchema } from "./query.js";
+import { validateRequestData } from "../../common/validation.utils.js";
 
-export const findManyUsersHandler: RequestHandler<
-  unknown,
-  unknown,
-  unknown,
-  FindManyUsersReqQuery
-> = async (req, res) => {
-  const { page, limit } = req.query;
+export const findManyUsersHandler: RequestHandler = async (req, res) => {
+  // Validate request data
+  const validation = validateRequestData({
+    req,
+    schemas: {
+      query: findManyUsersReqQuerySchema,
+    },
+  });
+
+  if (validation.error) {
+    res.status(400).json(validation.error);
+    return;
+  }
+
+  const { page, limit } = validation.data.query;
   const skip = (page - 1) * limit;
 
   try {

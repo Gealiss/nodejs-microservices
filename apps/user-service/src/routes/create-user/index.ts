@@ -7,14 +7,25 @@ import {
 } from "@repo/rmq-client";
 import { logger } from "@repo/logger";
 
-import { CreateUserReqBody } from "./body.js";
 import { usersCollection } from "../../db.js";
+import { validateRequestData } from "../../common/validation.utils.js";
+import { createUserReqBodySchema } from "./body.js";
 
-export const createUserHandler: RequestHandler<unknown, unknown, CreateUserReqBody> = async (
-  req,
-  res
-) => {
-  const userData = req.body;
+export const createUserHandler: RequestHandler = async (req, res) => {
+  // Validate request data
+  const validation = validateRequestData({
+    req,
+    schemas: {
+      body: createUserReqBodySchema,
+    },
+  });
+
+  if (validation.error) {
+    res.status(400).json(validation.error);
+    return;
+  }
+
+  const userData = validation.data.body;
 
   let createdAt: Date;
   let userId: string;
