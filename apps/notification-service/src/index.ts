@@ -10,6 +10,8 @@ import {
   userEventsExchangeName,
 } from "@repo/rmq-client";
 
+import { sendErrorResponse } from "./common/error.response-body.js";
+
 /**
  * RMQ consumer
  */
@@ -55,7 +57,7 @@ app.get("/health", async (req, res) => {
  * 404 handler for unmatched routes
  */
 app.use((req, res) => {
-  res.status(404).json({ message: `Not Found - ${req.originalUrl}` });
+  sendErrorResponse(res, 404, `Not Found: ${req.originalUrl}`);
 });
 
 const server = app.listen(env.PORT, () => {

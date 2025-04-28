@@ -11,6 +11,7 @@ import { logger } from "@repo/logger";
 import { usersCollection } from "../../db.js";
 import { validateRequestData } from "../../common/validation.utils.js";
 import { deleteUserReqParamsSchema } from "./params.js";
+import { sendErrorResponse } from "../../common/error.response-body.js";
 
 export const deleteUserHandler: RequestHandler = async (req, res) => {
   // Validate request data
@@ -22,7 +23,7 @@ export const deleteUserHandler: RequestHandler = async (req, res) => {
   });
 
   if (validation.error) {
-    res.status(400).json(validation.error);
+    sendErrorResponse(res, 400, validation.error.message, validation.error.details);
     return;
   }
 
@@ -31,12 +32,12 @@ export const deleteUserHandler: RequestHandler = async (req, res) => {
   try {
     const result = await usersCollection.deleteOne({ _id: new ObjectId(userId) });
     if (result.deletedCount !== 1) {
-      res.status(400).json({ error: "User was not deleted" });
+      sendErrorResponse(res, 400, "User was not deleted");
       return;
     }
   } catch (error) {
     logger.error(error);
-    res.sendStatus(500);
+    sendErrorResponse(res, 500, "Internal server error");
     return;
   }
 

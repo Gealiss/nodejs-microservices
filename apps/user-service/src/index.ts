@@ -6,6 +6,7 @@ import { logger } from "@repo/logger";
 import { mongoClient } from "@repo/mongodb-client";
 
 import { usersRouter } from "./routes/users.router.js";
+import { sendErrorResponse } from "./common/error.response-body.js";
 
 const app = express();
 
@@ -29,7 +30,7 @@ app.use("/users", usersRouter);
  * 404 handler for unmatched routes
  */
 app.use((req, res) => {
-  res.status(404).json({ message: `Not Found - ${req.originalUrl}` });
+  sendErrorResponse(res, 404, `Not Found: ${req.originalUrl}`);
 });
 
 const server = app.listen(env.PORT, () => {

@@ -4,6 +4,7 @@ import { logger } from "@repo/logger";
 import { usersCollection } from "../../db.js";
 import { findManyUsersReqQuerySchema } from "./query.js";
 import { validateRequestData } from "../../common/validation.utils.js";
+import { sendErrorResponse } from "../../common/error.response-body.js";
 
 export const findManyUsersHandler: RequestHandler = async (req, res) => {
   // Validate request data
@@ -15,7 +16,7 @@ export const findManyUsersHandler: RequestHandler = async (req, res) => {
   });
 
   if (validation.error) {
-    res.status(400).json(validation.error);
+    sendErrorResponse(res, 400, validation.error.message, validation.error.details);
     return;
   }
 
@@ -42,7 +43,7 @@ export const findManyUsersHandler: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     logger.error(error);
-    res.sendStatus(500);
+    sendErrorResponse(res, 500, "Internal server error");
     return;
   }
 };

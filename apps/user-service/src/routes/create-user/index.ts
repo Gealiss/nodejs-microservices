@@ -10,6 +10,7 @@ import { logger } from "@repo/logger";
 import { usersCollection } from "../../db.js";
 import { validateRequestData } from "../../common/validation.utils.js";
 import { createUserReqBodySchema } from "./body.js";
+import { sendErrorResponse } from "../../common/error.response-body.js";
 
 export const createUserHandler: RequestHandler = async (req, res) => {
   // Validate request data
@@ -21,7 +22,7 @@ export const createUserHandler: RequestHandler = async (req, res) => {
   });
 
   if (validation.error) {
-    res.status(400).json(validation.error);
+    sendErrorResponse(res, 400, validation.error.message, validation.error.details);
     return;
   }
 
@@ -38,7 +39,7 @@ export const createUserHandler: RequestHandler = async (req, res) => {
     createdAt = result.insertedId.getTimestamp();
   } catch (error) {
     logger.error(error);
-    res.sendStatus(500);
+    sendErrorResponse(res, 500, "Internal server error");
     return;
   }
 
