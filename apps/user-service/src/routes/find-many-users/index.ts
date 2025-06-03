@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { logger } from "@repo/logger";
+import { ObjectId } from "@repo/mongodb-client";
 
 import { usersCollection } from "../../db.js";
 import { findManyUsersReqQuerySchema } from "./query.js";
@@ -24,17 +25,18 @@ export const findManyUsersHandler: RequestHandler = async (req, res) => {
   const skip = (page - 1) * limit;
 
   try {
-    const data = await usersCollection
-      .find(
-        {},
-        {
-          projection: { _id: 1, id: 1, name: 1, email: 1, createdAt: 1 },
-        }
-      )
-      .sort({ createdAt: -1 })
+    const docs = await usersCollection
+      .find({}, { projection: { _id: 1, name: 1, email: 1 } })
+      .sort({ _id: -1 })
       .skip(skip)
       .limit(limit)
       .toArray();
+
+    const data = docs.map((doc) => ({
+      id: (doc._id as ObjectId).toString(),
+      name: doc.name,
+      email: doc.email,
+    }));
 
     res.json({
       data,
